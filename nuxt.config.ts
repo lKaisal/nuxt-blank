@@ -14,17 +14,16 @@ export default {
   },
   css: ['@/styles/app.styl'],
   loading: { color: '#fff' },
-  env: {
-    baseUrl: process.env.BASE_URL || 'http://localhost:3000'
+  axios: {
+    // make true to enable dev proxy
+    proxy: false
   },
-  // proxy: {
-  //   // redirects all request from '/api' to this url
-  //   '/api': 'http://your-api-base-url.com'
-  // },
+  proxy: {
+    '/api/': 'http://beta-project-name-master.dev.ct.beta.agency'
+  },
   modules: [
     '@nuxtjs/axios',
     '@nuxtjs/sitemap',
-    // '@nuxtjs/proxy',
     ['nuxt-i18n', {
       parsePages: false,
       locales: [
@@ -70,11 +69,20 @@ export default {
     dir: 'www'
   },
   build: {
-    transpile: ['lodash-es'],
-    extend(config) {
+    extend(config, { isClient }) {
       config.bail = true
+
+      config.output.filename = '[name].[hash].js'
+      config.output.chunkFilename = '[name].[chunkhash].js'
+
+      if (process.env.NODE_ENV === 'development' && isClient) {
+        config.devtool = 'eval-source-map'
+      }
     },
-    extractCSS: true,
+    extractCSS: process.env.NODE_ENV === 'production',
+    hotMiddleware: {
+      noInfo: true
+    },
     html: {
       minify: {
         collapseBooleanAttributes: false,

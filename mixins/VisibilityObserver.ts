@@ -1,22 +1,24 @@
 /** Обзервер вызывает коллбэк при появлении HTML-элементов (targets) в области видимости */
-interface Options {
+export interface Options {
   /** HTML-элемент или массив/нодлист/коллекцию элементов */
   targets: Element | Element[] | NodeList | HTMLCollection
   /** Отступ от края элемента - величина видимой части элемента для вызова коллбэка ifIntoView */
   offset: number
+  threshold?: number
+
   /** Внимание, **this** в этом коллбеке ссылается на текущий элемент. Коллбэк, срабатывающий когда элемент появляется в зоне видимости с учетом offset */
   ifIntoView?: () => void
   /** Внимание, **this** в этом коллбеке ссылается на текущий элемент. Коллбэк, срабатывающий когда элемент находится вне зоны видимости с учетом offset */
   ifOutOfView?: () => void
 }
 
-export default class VisibilityObserver {
+export class VisibilityObserver {
   options: Options
   observer: any
 
   constructor(options: Options) {
     this.options = options
-    let targets = options.targets;
+    let targets = options.targets
 
     if (targets instanceof NodeList || targets instanceof HTMLCollection) {
       targets = Array.from(targets) as Element[]
@@ -46,6 +48,7 @@ export default class VisibilityObserver {
       }
     }, {
       rootMargin: `-${this.options.offset}px`,
+      threshold: this.options.threshold || 0
     })
 
     this.observer.observe(target)
@@ -57,3 +60,5 @@ export default class VisibilityObserver {
     }
   }
 }
+
+export default VisibilityObserver
